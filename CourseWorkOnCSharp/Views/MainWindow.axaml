@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CourseWorkOnCSharp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:CourseWorkOnCSharp.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="800" Height="450"
+        CanResize="False"
+        x:Class="CourseWorkOnCSharp.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Властелин разума — Меню"
+        Closing="Close_Handler">
+    
+    <Design.DataContext>
+        <viewModels:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <Grid ColumnDefinitions="*, *, *, *" RowDefinitions="*, *, *">
+        <TextBlock 
+            Grid.Row="0" Grid.Column="0" 
+            Grid.ColumnSpan="4"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            FontSize="30"
+            FontWeight="UltraBold"
+            Text="Выберите действие"/>
+        
+        <Grid.Styles>
+            <Style Selector="Button">
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="Height" Value="40"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="BorderBrush" Value="Black"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="20"/>
+            </Style>
+        </Grid.Styles>
+        
+        <Button Grid.Row="1" Grid.Column="1" Content="Подключиться к лобби"/>
+        <Button  Grid.Row="1" Grid.Column="2" Content="Создать лобби"/>
+    </Grid>
+</Window>

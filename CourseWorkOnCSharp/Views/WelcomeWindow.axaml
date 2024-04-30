@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CourseWorkOnCSharp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:CourseWorkOnCSharp.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Width="800" Height="450"
+        CanResize="False"
+        x:Class="CourseWorkOnCSharp.Views.WelcomeWindow"
+        x:DataType="vm:WelcomeWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Властелин разума — Подключение">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <viewModels:WelcomeWindowViewModel/>
+    </Design.DataContext>
+
+    <DockPanel>
+        <TextBlock
+            DockPanel.Dock="Top"
+            HorizontalAlignment="Center"
+            Margin="40"
+            FontSize="30"
+            FontWeight="UltraBold"
+            Text="Добро пожаловать"/>
+        
+        <StackPanel VerticalAlignment="Center" Spacing="10">
+            <TextBlock 
+                HorizontalAlignment="Center"
+                Text="Введите IP-адрес сервера"/>
+            
+            <TextBox
+                Width="240"
+                x:Name="AddressTextBox"/>
+            
+            <Button 
+                HorizontalAlignment="Center"
+                Content="Подключиться"
+                BorderThickness="1"
+                BorderBrush="Black"
+                Click="ConnectButton_Click"/>
+        </StackPanel>
+    </DockPanel>
+
+</Window>

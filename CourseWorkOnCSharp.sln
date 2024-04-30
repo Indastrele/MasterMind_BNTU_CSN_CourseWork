@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseWorkOnCSharp", "CourseWorkOnCSharp\CourseWorkOnCSharp.csproj", "{4013CD8A-860E-4FFA-AFE7-4F98249DD6BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseWorkServer", "CourseWorkServer\CourseWorkServer.csproj", "{7BAD0D59-8528-4EA0-8BA8-C843567D7F2E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4013CD8A-860E-4FFA-AFE7-4F98249DD6BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4013CD8A-860E-4FFA-AFE7-4F98249DD6BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4013CD8A-860E-4FFA-AFE7-4F98249DD6BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4013CD8A-860E-4FFA-AFE7-4F98249DD6BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BAD0D59-8528-4EA0-8BA8-C843567D7F2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BAD0D59-8528-4EA0-8BA8-C843567D7F2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BAD0D59-8528-4EA0-8BA8-C843567D7F2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BAD0D59-8528-4EA0-8BA8-C843567D7F2E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
