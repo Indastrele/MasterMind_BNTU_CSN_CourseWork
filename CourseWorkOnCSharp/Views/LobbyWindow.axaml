@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CourseWorkOnCSharp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:CourseWorkOnCSharp.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="320" d:DesignHeight="300"
+        Width="320" Height="300"
+        x:Class="CourseWorkOnCSharp.Views.LobbyWindow"
+        x:DataType="vm:LobbyWindowViewModel"
+        Title="LobbyWindow">
+    
+    <Design.DataContext>
+        <viewModels:LobbyWindowViewModel/>
+    </Design.DataContext>
+    
+    <Grid RowDefinitions="*,*">
+        <DockPanel Grid.Row="0" Margin="40">
+            <DockPanel.Styles>
+                <Style Selector="TextBlock">
+                    <Setter Property="DockPanel.Dock" Value="Left"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="FontSize" Value="22"/>
+                    <Setter Property="FontWeight" Value="UltraBold"/>
+                </Style>
+            </DockPanel.Styles>
+            
+            <TextBlock Text="ID лобби: "/>
+            <TextBlock Text="{Binding IDInfo}"/>
+        </DockPanel>
+        
+        <TextBlock 
+            Grid.Row="1" 
+            Margin="40"
+            FontSize="18"
+            FontWeight="Bold"
+            VerticalAlignment="Top"
+            Text="Ожидание"/>
+        
+        <Button 
+            Grid.Row="1" 
+            VerticalAlignment="Bottom" 
+            Margin="40" 
+            Content="Выйти" 
+            CornerRadius="15"
+            BorderThickness="2"
+            BorderBrush="Black"
+            FontWeight="Bold"
+            FontSize="12"
+            Width="80"
+            HorizontalContentAlignment="Center"
+            Click="Cancel_Click"/>
+    </Grid>
+</Window>

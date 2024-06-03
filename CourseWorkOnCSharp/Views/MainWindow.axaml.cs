@@ -1,8 +1,8 @@
-using System.ComponentModel;
 using System.Net.Sockets;
 using System.Text;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using CourseWorkOnCSharp.ViewModels;
 
@@ -11,7 +11,12 @@ namespace CourseWorkOnCSharp.Views;
 public partial class MainWindow : Window
 {
     private WelcomeWindow _welcomeWindow;
-    private Socket _connectionToServer;
+    private Socket _endPoint;
+
+    public Socket EndPoint
+    {
+        get => _endPoint;
+    }
     
     public MainWindow()
     {
@@ -29,7 +34,7 @@ public partial class MainWindow : Window
 #endif
 
         _welcomeWindow = entryWindow;
-        _connectionToServer = connection;
+        _endPoint = connection;
     }
 
     private void InitializeComponent()
@@ -40,9 +45,31 @@ public partial class MainWindow : Window
     private void Close_Handler(object sender, WindowClosingEventArgs e)
     {
         _welcomeWindow.Show();
-        _connectionToServer.Send("END\n"u8.ToArray());
-        _connectionToServer.Shutdown(SocketShutdown.Both);
-        _connectionToServer.Close();
+        _endPoint.Send("END\n"u8.ToArray());
+        _endPoint.Shutdown(SocketShutdown.Both);
+        _endPoint.Close();
+        Hide();
+    }
+
+    private void Connect_Click(object sender, RoutedEventArgs e)
+    {
+        var joinWindow = new JoinWindow(this);
+        joinWindow.Show();
+        
+        Hide();
+    }
+
+    private async void Create_Click(object sender, RoutedEventArgs e)
+    {
+        await _endPoint.SendAsync("CREATE\n"u8.ToArray());
+
+        var buffer = new byte[1024];
+        await _endPoint.ReceiveAsync(buffer);
+        var response = Encoding.UTF8.GetString(buffer).Trim().Split(",");
+
+        var lobbyWindow = new LobbyWindow(int.Parse(response[1]), this);
+        lobbyWindow.Show();
+        
         Hide();
     }
 }

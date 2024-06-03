@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="360" d:DesignHeight="760"
+        Width="360" Height="760"
+        x:Class="CourseWorkOnCSharp.Views.SeekerWindow"
+        Title="SeekerWindow">
+    <Grid RowDefinitions="0.3*, 2.1*">
+        <Grid.Styles>
+            <Style Selector="Border">
+                <Setter Property="Background" Value="LightGray" />
+                <Setter Property="CornerRadius" Value="45" />
+                <Setter Property="BorderThickness" Value="2" />
+                <Setter Property="BorderBrush" Value="Black" />
+                <Setter Property="Margin" Value="8" />
+            </Style>
+        </Grid.Styles>
+        
+        <Border Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <WrapPanel x:Name="CypherPanel" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        
+        <Border Grid.Row="1">
+            <StackPanel x:Name="DecryptPanel" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+    </Grid>
+</Window>

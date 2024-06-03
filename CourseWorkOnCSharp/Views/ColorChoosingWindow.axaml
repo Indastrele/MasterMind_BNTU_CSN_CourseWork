@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="400"
+        Width="300" Height="400"
+        x:Class="CourseWorkOnCSharp.Views.ColorChoosingWindow"
+        Title="ColorChoosingWindow"
+        Background="#C95E35">
+    <Grid RowDefinitions="*,0.1*">
+        <ListBox Grid.Row="0" HorizontalAlignment="Stretch" Background="#C95E35">
+            <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="FontWeight" Value="UltraBold"/>
+                </Style>
+            </ListBox.Styles>
+            <ListBoxItem Content="None" Foreground="LightGray" KeyUp="Color_Click"/>
+            <ListBoxItem Content="Red" Foreground="Red" KeyUp="Color_Click"/>
+            <ListBoxItem Content="Blue" Foreground="Blue" KeyUp="Color_Click"/>
+            <ListBoxItem Content="Yellow" Foreground="Yellow" KeyUp="Color_Click"/>
+            <ListBoxItem Content="Green" Foreground="Green" KeyUp="Color_Click"/>
+            <ListBoxItem Content="Magenta" Foreground="Magenta" KeyUp="Color_Click"/>
+            <ListBoxItem Content="Purple" Foreground="Purple" KeyUp="Color_Click"/>
+            <ListBoxItem Content="Black" Foreground="Black" KeyUp="Color_Click"/>
+            <ListBoxItem Content="White" Foreground="White" KeyUp="Color_Click"/>
+        </ListBox>
+        <Button 
+            Grid.Row="1" 
+            Content="Отменить" 
+            HorizontalAlignment="Center" 
+            Background="LightGray" 
+            BorderBrush="Black"
+            BorderThickness="2"
+            FontWeight="Bold"
+            CornerRadius="15" 
+            Click="Cancel_Click"/>
+    </Grid>
+</Window>
