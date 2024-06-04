@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using Avalonia;
@@ -13,7 +14,7 @@ namespace CourseWorkOnCSharp.Views;
 public partial class SeekerWindow : Window
 {
     private MainWindow _mainWindow;
-    private Socket _endPoint;
+    private Stream _endPoint;
     private int _lobbyID;
     private List<Border> _cypher = new List<Border>();
     private List<List<Border>> _decrypt = new List<List<Border>>();
@@ -49,6 +50,7 @@ public partial class SeekerWindow : Window
         InitializeComponent();
 
         _mainWindow = mainWindow;
+        _endPoint = _mainWindow.EndPoint;
         _lobbyID = id;
         
         _cypher = ColorTranslator.TranslateUIntToBorder(colors);
@@ -98,11 +100,12 @@ public partial class SeekerWindow : Window
     {
         while (true)
         {
-            await _endPoint.SendAsync(Encoding.UTF8.GetBytes($"STATUS,{_lobbyID}\n"));
+            await _endPoint.WriteAsync(Encoding.UTF8.GetBytes($"STATUS,{_lobbyID}\n"));
+            await _endPoint.FlushAsync();
 
             var buffer = new byte[1024];
-            await _endPoint.ReceiveAsync(buffer);
-            var message = Encoding.UTF8.GetString(buffer).Trim().Split(',');
+            var length = await _endPoint.ReadAsync(buffer);
+            var message = Encoding.UTF8.GetString(buffer, 0, length).Trim().Split(',');
 
             if (message[0] == "STATUS")
             {

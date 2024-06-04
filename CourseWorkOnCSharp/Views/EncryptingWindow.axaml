@@ -25,7 +25,7 @@
             BorderThickness="2"
             CornerRadius="10">
             <WrapPanel
-                Width="200" Height="50"
+                Width="220" Height="50"
                 x:Name="EncryptPanel"
                 HorizontalAlignment="Center"/>
         </Border>
