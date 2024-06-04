@@ -36,7 +36,7 @@ namespace Server
                     while (true)
                     {
                         string message = "";
-                        var bytesRead = new byte[1024];
+                        var bytesRead = new byte[2048];
                         var count = await stream.ReadAsync(bytesRead, 0, bytesRead.Length);
                         var word = Encoding.UTF8.GetString(bytesRead, 0, count).Trim().TrimEnd('\n');
 
@@ -78,18 +78,16 @@ namespace Server
                                     var crypto = rnd.Next(0, 2);
                                     lobbies[lobbyID].Users[crypto].Role = UserRole.Cryptographer;
 
-                                    message = "START,";
-
                                     foreach (var user in lobbies[lobbyID].Users)
                                     {
                                         if (user.Role == UserRole.Cryptographer)
                                         {
-                                            user.Address.Write(Encoding.UTF8.GetBytes(message + "0"));
+                                            user.Address.Write(Encoding.UTF8.GetBytes("START,0"));
                                             user.Address.Flush();
                                         }
                                         else
                                         {
-                                            user.Address.Write(Encoding.UTF8.GetBytes(message + "1"));
+                                            user.Address.Write(Encoding.UTF8.GetBytes("START,1"));
                                             user.Address.Flush();
                                         }
                                     }
@@ -120,6 +118,8 @@ namespace Server
                                         break;
                                     }
                                 }
+
+                                lobbies.Remove(int.Parse(request[1]));
                             }
                         }
 
@@ -138,6 +138,8 @@ namespace Server
                                         break;
                                     }
                                 }
+                                
+                                lobbies.Remove(int.Parse(request[1]));
                             }
                         }
 

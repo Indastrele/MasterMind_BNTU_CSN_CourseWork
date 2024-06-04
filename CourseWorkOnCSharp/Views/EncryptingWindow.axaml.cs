@@ -135,6 +135,7 @@ public partial class EncryptingWindow : Window
                 .ShowAsync();
             _mainWindow.Show();
             Close();
+            return;
         }
         
         var seekerWindow = new SeekerWindow(ColorTranslator.TranslateToUInt(_buttons), _mainWindow, _lobbyID);

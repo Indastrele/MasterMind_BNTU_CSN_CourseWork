@@ -41,8 +41,6 @@ public partial class SeekerWindow : Window
             
             _cypherPanel.Children.Add(_cypher[i]);
         }
-        
-        
     }
 
     public SeekerWindow(List<uint> colors, MainWindow mainWindow, int id)
