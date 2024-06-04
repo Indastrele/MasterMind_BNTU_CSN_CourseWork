@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using Avalonia;
@@ -11,9 +12,9 @@ namespace CourseWorkOnCSharp.Views;
 public partial class MainWindow : Window
 {
     private WelcomeWindow _welcomeWindow;
-    private Socket _endPoint;
+    private Stream _endPoint;
 
-    public Socket EndPoint
+    public Stream EndPoint
     {
         get => _endPoint;
     }
@@ -26,7 +27,7 @@ public partial class MainWindow : Window
 #endif
     }
     
-    public MainWindow(WelcomeWindow entryWindow, Socket connection)
+    public MainWindow(WelcomeWindow entryWindow, Stream connection)
     {
         InitializeComponent();
 #if DEBUG
@@ -45,9 +46,8 @@ public partial class MainWindow : Window
     private void Close_Handler(object sender, WindowClosingEventArgs e)
     {
         _welcomeWindow.Show();
-        _endPoint.Send("END\n"u8.ToArray());
-        _endPoint.Shutdown(SocketShutdown.Both);
-        _endPoint.Close();
+        _endPoint.WriteAsync("END\n"u8.ToArray());
+        _endPoint.FlushAsync();
         Hide();
     }
 
@@ -61,11 +61,12 @@ public partial class MainWindow : Window
 
     private async void Create_Click(object sender, RoutedEventArgs e)
     {
-        await _endPoint.SendAsync("CREATE\n"u8.ToArray());
+        await _endPoint.WriteAsync("CREATE\n"u8.ToArray());
+        await _endPoint.FlushAsync();
 
         var buffer = new byte[1024];
-        await _endPoint.ReceiveAsync(buffer);
-        var response = Encoding.UTF8.GetString(buffer).Trim().Split(",");
+        var count = await _endPoint.ReadAsync(buffer);
+        var response = Encoding.UTF8.GetString(buffer, 0, count).Trim().Split(",");
 
         var lobbyWindow = new LobbyWindow(int.Parse(response[1]), this);
         lobbyWindow.Show();

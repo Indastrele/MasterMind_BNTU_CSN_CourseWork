@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -12,7 +13,7 @@ namespace CourseWorkOnCSharp.Views;
 
 public partial class LobbyWindow : Window
 {
-    private Socket _endPoint;
+    private Stream _endPoint;
     private CancellationTokenSource cts = new CancellationTokenSource();
     private int _lobbyID;
     private LobbyWindowViewModel _viewModel = new LobbyWindowViewModel();
@@ -54,8 +55,8 @@ public partial class LobbyWindow : Window
         try
         {
             var buffer = new byte[1024];
-            var responseLength = await _endPoint.ReceiveAsync(buffer, SocketFlags.None, cts.Token);
-            var message = Encoding.UTF8.GetString(buffer).Trim().Split(',');
+            var responseLength = await _endPoint.ReadAsync(buffer, cts.Token);
+            var message = Encoding.UTF8.GetString(buffer, 0, responseLength).Trim().Split(',');
 
             switch (int.Parse(message[1]))
             {

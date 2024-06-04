@@ -11,10 +11,10 @@ public enum UserRole
 
 public class User
 {
-    private Socket _endPoint;
+    private Stream _endPoint;
     private UserRole _role;
 
-    public Socket Address
+    public Stream Address
     {
         get => _endPoint;
         set => _endPoint = value;
@@ -28,10 +28,12 @@ public class User
 
     public User()
     {
+        _role = UserRole.Guesser;
     }
 
-    public User(Socket endPoint)
+    public User(Stream endPoint)
     {
+        _role = UserRole.Guesser;
         _endPoint = endPoint;
     }
 }

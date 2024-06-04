@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using Avalonia;
@@ -12,7 +13,7 @@ namespace CourseWorkOnCSharp.Views;
 public partial class JoinWindow : Window
 {
     private MainWindow _mainWindow;
-    private Socket _endPoint;
+    private Stream _endPoint;
     private TextBox _id;
     
     public JoinWindow()
@@ -54,11 +55,12 @@ public partial class JoinWindow : Window
             return;
         }
         
-        await _endPoint.SendAsync(Encoding.UTF8.GetBytes($"JOIN,{lobbyID}\n"));
+        await _endPoint.WriteAsync(Encoding.UTF8.GetBytes($"JOIN,{lobbyID}\n"));
+        await _endPoint.FlushAsync();
 
         var buffer = new byte[1024];
-        await _endPoint.ReceiveAsync(buffer);
-        var message = Encoding.UTF8.GetString(buffer).Trim().Split(',');
+        var count = await _endPoint.ReadAsync(buffer);
+        var message = Encoding.UTF8.GetString(buffer, 0, count).Trim().Split(',');
 
         if (message[0] == "ERROR")
         {

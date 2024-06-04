@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using Avalonia;
@@ -15,7 +16,7 @@ namespace CourseWorkOnCSharp.Views;
 public partial class EncryptingWindow : Window
 {
     private MainWindow _mainWindow;
-    private Socket _endPoint;
+    private Stream _endPoint;
     private int _lobbyID;
     private List<Button> _buttons = new List<Button>();
     private WrapPanel _encryptPanel;
@@ -124,7 +125,8 @@ public partial class EncryptingWindow : Window
 
         try
         {
-            await _endPoint.SendAsync(Encoding.UTF8.GetBytes(message));
+            await _endPoint.WriteAsync(Encoding.UTF8.GetBytes(message));
+            await _endPoint.FlushAsync();
         }
         catch
         {

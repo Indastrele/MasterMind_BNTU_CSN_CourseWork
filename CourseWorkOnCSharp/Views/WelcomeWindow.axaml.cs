@@ -28,7 +28,7 @@ public partial class WelcomeWindow : Window
     
     private void ConnectButton_Click(object sender, RoutedEventArgs e)
     {
-        var isConnected = IPAddress.TryParse(_addressTextBox.Text!, out var serverAddress);
+        var isConnected = IPAddress.TryParse(_addressTextBox.Text!, out var _);
 
         if (!isConnected)
         {
@@ -39,22 +39,9 @@ public partial class WelcomeWindow : Window
             return;
         }
         
-        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        try
-        {
-            socket.Connect(serverAddress!, 11000);
-            Console.WriteLine($"Подключение к {serverAddress} установлено");
-        }
-        catch (SocketException)
-        {
-            MessageBoxManager.GetMessageBoxStandard(
-                "SocketException",
-                $"Не удалось установить подключение к {serverAddress}")
-                .ShowAsync();
-            return;
-        }
-        
-        _clientMenu = new MainWindow(this, socket)
+        var socket = new TcpClient(_addressTextBox.Text!, 11000);
+
+        _clientMenu = new MainWindow(this, socket.GetStream())
         {
             DataContext = new MainWindowViewModel(),
         };

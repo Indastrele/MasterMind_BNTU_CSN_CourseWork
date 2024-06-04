@@ -19,200 +19,196 @@ namespace Server
         {
             int currentKey = 0;
             Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
-            var ipPoint = new IPEndPoint(IPAddress.Parse(DEAFALUT_GATEWAY), PORT);
-            using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Bind(ipPoint);
-            socket.Listen(LENGTH);
+            var socket = new TcpListener(IPAddress.Parse(DEAFALUT_GATEWAY), PORT);
+            socket.Start();
             while (true)
             {
-                var client = await socket.AcceptAsync();
-
-                await HandleClient(client, lobbies);
+                HandleClient(await socket.AcceptTcpClientAsync(), lobbies);
             }
         }
 
-        private static async Task HandleClient(Socket client, Dictionary<int, Lobby> lobbies)
+        private static async Task HandleClient(TcpClient client, Dictionary<int, Lobby> lobbies)
         {
-            while (client.Connected)
+            using (client)
             {
-                string message = "";
-                var response = new List<byte>();
-                var bytesRead = new byte[1];
-                while (true)
                 {
-                    var count = await client.ReceiveAsync(bytesRead);
-                    if (count == 0 || bytesRead[0] == '\n') break;
-                    response.Add(bytesRead[0]);
-                }
-                var word = Encoding.UTF8.GetString(response.ToArray());
-                if (word == "END") break;
-                
-                if (word == "CREATE")
-                {
-                    var rnd = new Random();
-                    var id = rnd.Next(0, 1024);
-
-                    while (lobbies.ContainsKey(id))
+                    var stream = client.GetStream();
+                    while (true)
                     {
-                        id = rnd.Next(0, 1024);
-                    }
+                        string message = "";
+                        var bytesRead = new byte[1024];
+                        var count = await stream.ReadAsync(bytesRead, 0, bytesRead.Length);
+                        var word = Encoding.UTF8.GetString(bytesRead, 0, count).Trim().TrimEnd('\n');
 
-                    lobbies.Add(id, new Lobby( new User(client)));
-                    await client.SendAsync(Encoding.UTF8.GetBytes($"LOBBY,{id}"));
-                }
+                        if (word == "END") break;
 
-                var request = word.Split(',');
-                
-                if (request[0] == "JOIN")
-                {
-                    User guesser = new User();
-                    User cryptographer = new User();
-                    lock (lobbies)
-                    {
-                        var lobbyID = int.Parse(request[1]);
-
-                        if (!lobbies.ContainsKey(lobbyID))
+                        if (word == "CREATE")
                         {
-                            message = "ERROR,Нет такого лобби";
-                        }
-
-                        if (message.Length == 0)
-                        {
-                            lobbies[int.Parse(request[1])].Users.Add(new User(client));
                             var rnd = new Random();
+                            var id = rnd.Next(0, 1024);
 
-                            var crypto = rnd.Next(0, 2);
-                            cryptographer = lobbies[lobbyID].Users[Math.Abs(crypto - 1)];
-                            guesser = lobbies[lobbyID].Users[crypto];
-                        }
-                    }
-
-                    if (message.Length > 0)
-                    {
-                        await client.SendAsync(Encoding.UTF8.GetBytes(message));
-                        continue;
-                    }
-
-                    cryptographer.Role = UserRole.Cryptographer;
-                    guesser.Role = UserRole.Guesser;
-                    
-                    message = "START,";
-                    await cryptographer.Address
-                        .SendAsync(Encoding.UTF8.GetBytes(message + "0"));
-                    
-                    await guesser.Address
-                        .SendAsync(Encoding.UTF8.GetBytes(message + "1"));
-                }
-
-                if (request[0] == "GIVEUP")
-                {
-                    User cryptographer = new User();
-                    lock (lobbies)
-                    {
-                        var users = lobbies[int.Parse(request[1])].Users;
-
-                        foreach (var user in users)
-                        {
-                            if (user.Role == UserRole.Cryptographer)
+                            while (lobbies.ContainsKey(id))
                             {
-                                cryptographer = user;
-                                break;
+                                id = rnd.Next(0, 1024);
+                            }
+
+                            lobbies.Add(id, new Lobby(new User(stream)));
+                            await stream.WriteAsync(Encoding.UTF8.GetBytes($"LOBBY,{id}"));
+                            await stream.FlushAsync();
+                        }
+
+                        var request = word.Split(',');
+
+                        if (request[0] == "JOIN")
+                        {
+                            lock (lobbies)
+                            {
+                                var lobbyID = int.Parse(request[1]);
+
+                                if (!lobbies.ContainsKey(lobbyID))
+                                {
+                                    message = "ERROR,Нет такого лобби";
+                                }
+
+                                if (message.Length == 0)
+                                {
+                                    lobbies[int.Parse(request[1])].Users.Add(new User(stream));
+                                    var rnd = new Random();
+
+                                    var crypto = rnd.Next(0, 2);
+                                    lobbies[lobbyID].Users[crypto].Role = UserRole.Cryptographer;
+
+                                    message = "START,";
+
+                                    foreach (var user in lobbies[lobbyID].Users)
+                                    {
+                                        if (user.Role == UserRole.Cryptographer)
+                                        {
+                                            user.Address.Write(Encoding.UTF8.GetBytes(message + "0"));
+                                            user.Address.Flush();
+                                        }
+                                        else
+                                        {
+                                            user.Address.Write(Encoding.UTF8.GetBytes(message + "1"));
+                                            user.Address.Flush();
+                                        }
+                                    }
+
+                                }
+                            }
+
+                            if (message.Length > 0)
+                            {
+                                await stream.WriteAsync(Encoding.UTF8.GetBytes(message));
+                                await stream.FlushAsync();
+                                continue;
                             }
                         }
-                    }
 
-                    await cryptographer.Address.SendAsync("RESULT,Вы выиграли"u8.ToArray());
-                }
-                
-                if (request[0] == "WIN")
-                {
-                    User cryptographer = new User();
-                    lock (lobbies)
-                    {
-                        var users = lobbies[int.Parse(request[1])].Users;
-
-                        foreach (var user in users)
+                        if (request[0] == "GIVEUP")
                         {
-                            if (user.Role == UserRole.Cryptographer)
+                            lock (lobbies)
                             {
-                                cryptographer = user;
-                                break;
+                                var users = lobbies[int.Parse(request[1])].Users;
+
+                                foreach (var user in users)
+                                {
+                                    if (user.Role == UserRole.Cryptographer)
+                                    {
+                                        user.Address.Write("RESULT,Вы выиграли"u8.ToArray());
+                                        user.Address.Flush();
+                                        break;
+                                    }
+                                }
                             }
                         }
-                    }
 
-                    await cryptographer.Address.SendAsync("RESULT,Вы проиграли"u8.ToArray());
-                }
-
-                if (request[0] == "STATUS")
-                {
-                    List<uint> currentState;
-                    var id = int.Parse(request[1]);
-                    int position;
-                    
-                    lock (lobbies)
-                    {
-                        position = lobbies[id].CurrentPosition;
-                        currentState = lobbies[id].CurrentButtonState[position];
-                    }
-
-                    message = $"STATUS,{position},";
-                    for (int i = 0; i < currentState.Count; i++)
-                    {
-                        message += $"{currentState[i]}";
-
-                        if (i != currentState.Count - 1) message += ";";
-                    }
-
-                    await client.SendAsync(Encoding.UTF8.GetBytes(message));
-                }
-
-                if (request[0] == "COMBINATION" && request.Length == 3)
-                {
-                    var nums = new List<uint>();
-                    var stringNums = request[2].Split(';');
-
-                    foreach (var stringNum in stringNums)
-                    {
-                        nums.Add(uint.Parse(stringNum));
-                    }
-
-                    lock (lobbies)
-                    {
-                        lobbies[int.Parse(request[1])].Combination = nums;
-                    }
-                }
-                
-                if (request[0] == "COMBINATION" && request.Length == 4)
-                {
-                    var nums = new List<uint>();
-                    var stringNums = request[3].Split(';');
-
-                    foreach (var stringNum in stringNums)
-                    {
-                        nums.Add(uint.Parse(stringNum));
-                    }
-
-                    lock (lobbies)
-                    {
-                        var id = int.Parse(request[1]);
-                        var position = int.Parse(request[2]);
-                        if (lobbies[id].CurrentPosition != position)
+                        if (request[0] == "WIN")
                         {
-                            lobbies[id].CurrentButtonState.Add(nums);
-                            lobbies[id].CurrentPosition = position;
+                            lock (lobbies)
+                            {
+                                var users = lobbies[int.Parse(request[1])].Users;
+
+                                foreach (var user in users)
+                                {
+                                    if (user.Role == UserRole.Cryptographer)
+                                    {
+                                        user.Address.Write("RESULT,Вы проиграли"u8.ToArray());
+                                        user.Address.Flush();
+                                        break;
+                                    }
+                                }
+                            }
                         }
-                        else
+
+                        if (request[0] == "STATUS")
                         {
-                            lobbies[id].CurrentButtonState[position] = nums;
+                            List<uint> currentState;
+                            var id = int.Parse(request[1]);
+                            int position;
+
+                            lock (lobbies)
+                            {
+                                position = lobbies[id].CurrentPosition;
+                                currentState = lobbies[id].CurrentButtonState[position];
+                            }
+
+                            message = $"STATUS,{position},";
+                            for (int i = 0; i < currentState.Count; i++)
+                            {
+                                message += $"{currentState[i]}";
+
+                                if (i != currentState.Count - 1) message += ";";
+                            }
+
+                            await stream.WriteAsync(Encoding.UTF8.GetBytes(message));
+                            await stream.FlushAsync();
+                        }
+
+                        if (request[0] == "COMBINATION" && request.Length == 3)
+                        {
+                            var nums = new List<uint>();
+                            var stringNums = request[2].Split(';');
+
+                            foreach (var stringNum in stringNums)
+                            {
+                                nums.Add(uint.Parse(stringNum));
+                            }
+
+                            lock (lobbies)
+                            {
+                                lobbies[int.Parse(request[1])].Combination = nums;
+                            }
+                        }
+
+                        if (request[0] == "COMBINATION" && request.Length == 4)
+                        {
+                            var nums = new List<uint>();
+                            var stringNums = request[3].Split(';');
+
+                            foreach (var stringNum in stringNums)
+                            {
+                                nums.Add(uint.Parse(stringNum));
+                            }
+
+                            lock (lobbies)
+                            {
+                                var id = int.Parse(request[1]);
+                                var position = int.Parse(request[2]);
+                                if (lobbies[id].CurrentPosition != position)
+                                {
+                                    lobbies[id].CurrentButtonState.Add(nums);
+                                    lobbies[id].CurrentPosition = position;
+                                }
+                                else
+                                {
+                                    lobbies[id].CurrentButtonState[position] = nums;
+                                }
+                            }
                         }
                     }
                 }
             }
-            
-            Console.WriteLine($"{(IPEndPoint)client.RemoteEndPoint!} shutting down");
-            client.Shutdown(SocketShutdown.Both);
-            client.Close();
         }
     }
 }

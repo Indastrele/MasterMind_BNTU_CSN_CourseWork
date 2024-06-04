@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using Avalonia;
@@ -15,7 +16,7 @@ public partial class DecryptingWindow : Window
 {
     private MainWindow _mainWindow;
     private int _lobbyID;
-    private Socket _endPoint;
+    private Stream _endPoint;
     private StackPanel _correspondencePanel;
     private StackPanel _decryptPanel;
     private List<List<Button>> _buttons = new List<List<Button>>();
@@ -156,18 +157,20 @@ public partial class DecryptingWindow : Window
             else message += "\n";
         }
 
-        await _endPoint.SendAsync(Encoding.UTF8.GetBytes(message));
+        await _endPoint.WriteAsync(Encoding.UTF8.GetBytes(message));
+        await _endPoint.FlushAsync();
 
         var buffer = new byte[1024];
-        await _endPoint.ReceiveAsync(buffer);
-        var response = Encoding.UTF8.GetString(buffer).Trim().Split(",");
+        var count = await _endPoint.ReadAsync(buffer);
+        var response = Encoding.UTF8.GetString(buffer, 0, count).Trim().Split(",");
 
         if (response[0] != "CORRESPONDENCE") return;
 
         if (int.Parse(response[1]) == 4)
         {
             var request = $"WIN,{_lobbyID}";
-            await _endPoint.SendAsync(Encoding.UTF8.GetBytes(request));
+            await _endPoint.WriteAsync(Encoding.UTF8.GetBytes(request));
+            await _endPoint.FlushAsync();
             
             var resultWindow = new ResultWindow("Вы выиграли", _mainWindow);
             resultWindow.Show();
@@ -185,7 +188,8 @@ public partial class DecryptingWindow : Window
         if (_guessingIndex == 8)
         {
             var request = $"GIVEUP,{_lobbyID}";
-            await _endPoint.SendAsync(Encoding.UTF8.GetBytes(request));
+            await _endPoint.WriteAsync(Encoding.UTF8.GetBytes(request));
+            await _endPoint.FlushAsync();
             
             var resultWindow = new ResultWindow("Вы проиграли", _mainWindow);
             resultWindow.Show();
@@ -202,7 +206,8 @@ public partial class DecryptingWindow : Window
     private async void GiveUpButton_Click(object sender, RoutedEventArgs e)
     {
         var request = $"GIVEUP,{_lobbyID}";
-        await _endPoint.SendAsync(Encoding.UTF8.GetBytes(request));
+        await _endPoint.WriteAsync(Encoding.UTF8.GetBytes(request));
+        await _endPoint.FlushAsync();
         
         var resultWindow = new ResultWindow("Вы проиграли", _mainWindow);
         resultWindow.Show();
